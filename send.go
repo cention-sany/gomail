@@ -13,11 +13,21 @@ func (m *Mailer) getSendMailFunc(ssl bool) SendMailFunc {
 		var err error
 		if ssl {
 			c, err = sslDial(addr, m.host, m.config)
+			if err != nil {
+				return err
+			} else {
+				if "" != m.localhost {
+					if err = c.Hello(m.localhost); err != nil {
+						c.Close()
+						return err
+					}
+				}
+			}
 		} else {
-			c, err = starttlsDial(addr, m.config)
-		}
-		if err != nil {
-			return err
+			c, err = starttlsDial(addr, m.localhost, m.config)
+			if err != nil {
+				return err
+			}
 		}
 		defer c.Close()
 
@@ -56,6 +66,7 @@ func (m *Mailer) getSendMailFunc(ssl bool) SendMailFunc {
 	}
 }
 
+// no need to close connection if return non-nil error
 func sslDial(addr, host string, config *tls.Config) (smtpClient, error) {
 	conn, err := initTLS("tcp", addr, config)
 	if err != nil {
@@ -65,16 +76,24 @@ func sslDial(addr, host string, config *tls.Config) (smtpClient, error) {
 	return newClient(conn, host)
 }
 
-func starttlsDial(addr string, config *tls.Config) (smtpClient, error) {
+// no need to close connection if return non-nil error
+func starttlsDial(addr, localhost string, config *tls.Config) (smtpClient, error) {
 	c, err := initSMTP(addr)
 	if err != nil {
 		return c, err
 	}
-
-	if ok, _ := c.Extension("STARTTLS"); ok {
-		return c, c.StartTLS(config)
+	if "" != localhost {
+		if err = c.Hello(localhost); err != nil {
+			c.Close()
+			return c, err
+		}
 	}
-
+	if ok, _ := c.Extension("STARTTLS"); ok {
+		if err = c.StartTLS(config); nil != err {
+			c.Close()
+			return c, err
+		}
+	}
 	return c, nil
 }
 
@@ -94,6 +113,7 @@ type smtpClient interface {
 	Extension(string) (bool, string)
 	StartTLS(*tls.Config) error
 	Auth(smtp.Auth) error
+	Hello(string) error
 	Mail(string) error
 	Rcpt(string) error
 	Data() (io.WriteCloser, error)

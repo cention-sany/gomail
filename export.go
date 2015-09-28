@@ -51,7 +51,7 @@ func (msg *Message) Export() *mail.Message {
 }
 
 func (msg *Message) hasMixedPart() bool {
-	return (len(msg.parts) > 0 && len(msg.attachments) > 0) || len(msg.attachments) > 1
+	return (len(msg.parts) > 0 && (len(msg.attachments) > 0 || len(msg.embedded) > 0)) || len(msg.attachments) > 1
 }
 
 func (msg *Message) hasRelatedPart() bool {

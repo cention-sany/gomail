@@ -13,11 +13,12 @@ import (
 
 // A Mailer represents an SMTP server.
 type Mailer struct {
-	addr   string
-	host   string
-	config *tls.Config
-	auth   smtp.Auth
-	send   SendMailFunc
+	addr      string
+	host      string
+	localhost string
+	config    *tls.Config
+	auth      smtp.Auth
+	send      SendMailFunc
 }
 
 // A MailerSetting can be used in a mailer constructor to configure it.
@@ -42,6 +43,13 @@ func SetSendMail(s SendMailFunc) MailerSetting {
 func SetTLSConfig(c *tls.Config) MailerSetting {
 	return func(m *Mailer) {
 		m.config = c
+	}
+}
+
+// SetLocalHost allows HELO msg to be send with customized string.
+func SetLocalHost(h string) MailerSetting {
+	return func(m *Mailer) {
+		m.localhost = h
 	}
 }
 
