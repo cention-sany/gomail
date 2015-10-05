@@ -230,12 +230,17 @@ type File struct {
 }
 
 // OpenFile opens a file on disk to create a gomail.File.
-func OpenFile(filename string) (*File, error) {
+// Overload func(filename, original_filename string)
+func OpenFile(filename string, v ...interface{}) (*File, error) {
 	content, err := readFile(filename)
 	if err != nil {
 		return nil, err
 	}
-
+	if v != nil {
+		if original, ok := v[0].(string); ok {
+			filename = original
+		}
+	}
 	f := CreateFile(filepath.Base(filename), content)
 
 	return f, nil
