@@ -8,7 +8,7 @@ import (
 	"net/mail"
 	"time"
 
-	"gopkg.in/alexcesaro/quotedprintable.v2"
+	"github.com/cention-sany/quotedprintable"
 )
 
 // Export converts the message into a net/mail.Message.
@@ -169,8 +169,15 @@ func (w *messageWriter) writeBody(body []byte, enc Encoding) {
 	} else if enc == Unencoded {
 		subWriter.Write(body)
 	} else {
-		writer := quotedprintable.NewEncoder(newQpLineWriter(subWriter))
-		writer.Write(body)
+		writer := quotedprintable.NewWriter(subWriter)
+		_, err := writer.Write(body)
+		if err != nil {
+			//log.Println("error while converting to qp")
+		}
+		err = writer.Close()
+		if err != nil {
+			//log.Println("error while closing writer for qp")
+		}
 	}
 }
 
@@ -206,57 +213,4 @@ func (w *base64LineWriter) Write(p []byte) (int, error) {
 	w.lineLen += len(p)
 
 	return n + len(p), nil
-}
-
-// qpLineWriter limits text encoded in quoted-printable to 76 characters per
-// line
-type qpLineWriter struct {
-	w       io.Writer
-	lineLen int
-}
-
-func newQpLineWriter(w io.Writer) *qpLineWriter {
-	return &qpLineWriter{w: w}
-}
-
-func (w *qpLineWriter) Write(p []byte) (int, error) {
-	n := 0
-	for len(p) > 0 {
-		// If the text is not over the limit, write everything
-		if len(p) < maxLineLen-w.lineLen {
-			w.w.Write(p)
-			w.lineLen += len(p)
-			return n + len(p), nil
-		}
-
-		i := bytes.IndexAny(p[:maxLineLen-w.lineLen+2], "\n")
-		// If there is a newline before the limit, write the end of the line
-		if i != -1 && (i != maxLineLen-w.lineLen+1 || p[i-1] == '\r') {
-			w.w.Write(p[:i+1])
-			p = p[i+1:]
-			n += i + 1
-			w.lineLen = 0
-			continue
-		}
-
-		// Quoted-printable text must not be cut between an equal sign and the
-		// two following characters
-		var toWrite int
-		if maxLineLen-w.lineLen-2 >= 0 && p[maxLineLen-w.lineLen-2] == '=' {
-			toWrite = maxLineLen - w.lineLen - 2
-		} else if p[maxLineLen-w.lineLen-1] == '=' {
-			toWrite = maxLineLen - w.lineLen - 1
-		} else {
-			toWrite = maxLineLen - w.lineLen
-		}
-
-		// Insert the newline where it is needed
-		w.w.Write(p[:toWrite])
-		w.w.Write([]byte("=\r\n"))
-		p = p[toWrite:]
-		n += toWrite
-		w.lineLen = 0
-	}
-
-	return n, nil
 }
