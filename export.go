@@ -8,7 +8,7 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/cention-sany/quotedprintable"
+	"github.com/cention-sany/mime/quotedprintable"
 )
 
 // Export converts the message into a net/mail.Message.
