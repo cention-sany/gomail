@@ -56,7 +56,7 @@ func (w *messageWriter) writeMessage(m *Message) {
 }
 
 func (m *Message) hasMixedPart() bool {
-	return (len(m.parts) > 0 && len(m.attachments) > 0) || len(m.attachments) > 1
+	return (len(m.parts) > 0 && (len(m.attachments) > 0 || len(m.embedded) > 0)) || len(m.attachments) > 1
 }
 
 func (m *Message) hasRelatedPart() bool {
