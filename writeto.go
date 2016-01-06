@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
-	"mime"
-	"mime/multipart"
 	"path/filepath"
 	"time"
+
+	"github.com/cention-sany/mime"
+	"github.com/cention-sany/mime/multipart"
 )
 
 // WriteTo implements io.WriterTo. It dumps the whole message into w.
