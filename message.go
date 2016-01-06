@@ -271,6 +271,18 @@ func SetCopyFunc(f func(io.Writer) error) FileSetting {
 	}
 }
 
+// RenameFile allow custom filename string to be used at the header portion.
+// The content will still be fetched from filename passed to Attach/Embed.
+func RenameFile(n string) FileSetting {
+	return func(f *file) {
+		f.Name = n
+	}
+}
+
+// appendFile use the name to retrieve the content of the file. The filename can be
+// changed afterward through RenameFile FileSetting. Because of this FileSetting
+// should always come after the CopyFunc AND CopyFunc should get the filename from
+// argument and NOT from file.Name which can be changed anytime through RenameFile.
 func (m *Message) appendFile(list []*file, name string, settings []FileSetting) []*file {
 	f := &file{
 		Name:   filepath.Base(name),
