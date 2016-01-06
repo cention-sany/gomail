@@ -1,10 +1,8 @@
-// +build go1.5
-
 package gomail
 
 import (
-	"mime"
-	"mime/quotedprintable"
+	"github.com/cention-sany/mime"
+	"github.com/cention-sany/mime/quotedprintable"
 )
 
 var newQPWriter = quotedprintable.NewWriter
