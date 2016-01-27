@@ -62,11 +62,14 @@ func send(s Sender, m *Message) error {
 }
 
 func (m *Message) getFrom() (string, error) {
-	from := m.header["Sender"]
+	from := m.header["Return-Path"]
 	if len(from) == 0 {
-		from = m.header["From"]
+		from = m.header["Sender"]
 		if len(from) == 0 {
-			return "", errors.New(`gomail: invalid message, "From" field is absent`)
+			from = m.header["From"]
+			if len(from) == 0 {
+				return "", errors.New(`gomail: invalid message, "From" field is absent`)
+			}
 		}
 	}
 
