@@ -158,11 +158,14 @@ func flattenHeader(msg *mail.Message, bcc string) []byte {
 }
 
 func getFrom(msg *mail.Message) (string, error) {
-	from := msg.Header.Get("Sender")
+	from := msg.Header.Get("Return-Path")
 	if from == "" {
-		from = msg.Header.Get("From")
+		from = msg.Header.Get("Sender")
 		if from == "" {
-			return "", errors.New("mailer: invalid message, \"From\" field is absent")
+			from = msg.Header.Get("From")
+			if from == "" {
+				return "", errors.New("mailer: invalid message, \"From\" field is absent")
+			}
 		}
 	}
 
