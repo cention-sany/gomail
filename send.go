@@ -30,7 +30,7 @@ func (m *Mailer) getSendMailFunc(ssl bool) SendMailFunc {
 			}
 		}
 		defer c.Close()
-
+		m.Closer = c
 		if a != nil {
 			if ok, _ := c.Extension("AUTH"); ok {
 				if err = c.Auth(a); err != nil {

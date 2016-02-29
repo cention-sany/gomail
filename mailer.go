@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/mail"
@@ -13,6 +14,7 @@ import (
 
 // A Mailer represents an SMTP server.
 type Mailer struct {
+	io.Closer
 	addr      string
 	host      string
 	localhost string
