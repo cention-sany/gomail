@@ -369,31 +369,34 @@ func TestEmbedded(t *testing.T) {
 		to:   []string{"to@example.com"},
 		content: "From: from@example.com\r\n" +
 			"To: to@example.com\r\n" +
-			"Content-Type: multipart/related; boundary=_BOUNDARY_1_\r\n" +
+			"Content-Type: multipart/mixed; boundary=_BOUNDARY_1_\r\n" +
 			"\r\n" +
 			"--_BOUNDARY_1_\r\n" +
+			"Content-Type: multipart/related; boundary=_BOUNDARY_2_\r\n" +
+			"\r\n" +
+			"--_BOUNDARY_2_\r\n" +
 			"Content-Type: text/plain; charset=UTF-8\r\n" +
 			"Content-Transfer-Encoding: quoted-printable\r\n" +
 			"\r\n" +
 			"Test\r\n" +
-			"--_BOUNDARY_1_\r\n" +
+			"--_BOUNDARY_2_\r\n" +
 			"Content-Type: image/jpeg; name=\"image1.jpg\"\r\n" +
 			"Content-Disposition: inline; filename=\"image1.jpg\"\r\n" +
 			"Content-ID: <test-content-id>\r\n" +
 			"Content-Transfer-Encoding: base64\r\n" +
 			"\r\n" +
 			base64.StdEncoding.EncodeToString([]byte("Content of image1.jpg")) + "\r\n" +
-			"--_BOUNDARY_1_\r\n" +
+			"--_BOUNDARY_2_\r\n" +
 			"Content-Type: image/jpeg; name=\"image2.jpg\"\r\n" +
 			"Content-Disposition: inline; filename=\"image2.jpg\"\r\n" +
 			"Content-ID: <image2.jpg>\r\n" +
 			"Content-Transfer-Encoding: base64\r\n" +
 			"\r\n" +
 			base64.StdEncoding.EncodeToString([]byte("Content of image2.jpg")) + "\r\n" +
-			"--_BOUNDARY_1_--\r\n",
+			"--_BOUNDARY_2_--\r\n" + "\r\n" + "--_BOUNDARY_1_--\r\n",
 	}
 
-	testMessage(t, m, 1, want)
+	testMessage(t, m, 2, want)
 }
 
 func TestFullMessage(t *testing.T) {
