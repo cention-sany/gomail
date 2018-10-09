@@ -32,11 +32,21 @@ func (f SendFunc) Send(from string, to []string, msg io.WriterTo) error {
 	return f(from, to, msg)
 }
 
+type Error struct {
+	Err          error
+	Total, Index int
+}
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("gomail: could not send email %d: %v", e.Index+1, e.Err)
+}
+
 // Send sends emails using the given Sender.
 func Send(s Sender, msg ...*Message) error {
+	msgSize := len(msg)
 	for i, m := range msg {
 		if err := send(s, m); err != nil {
-			return fmt.Errorf("gomail: could not send email %d: %v", i+1, err)
+			return &Error{Err: err, Total: msgSize, Index: i}
 		}
 	}
 
