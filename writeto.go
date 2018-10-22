@@ -116,7 +116,7 @@ func (w *messageWriter) addFiles(files []*file, isAttachment bool) {
 	for _, f := range files {
 		if _, ok := f.Header["Content-Type"]; !ok {
 			mediaType := mime.TypeByExtension(filepath.Ext(f.Name))
-			if mediaType == "" {
+			if mediaType == "" || mediaType == "message/rfc822" {
 				mediaType = "application/octet-stream"
 			}
 			f.setHeader("Content-Type", mediaType+`; name="`+f.Name+`"`)
